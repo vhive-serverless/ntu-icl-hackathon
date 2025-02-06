@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: team-$NUMBER
+  labels:
+    purpose: hackathon
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: team-$NUMBER
+  name: team-member
+rules:
+# Knative Serving CRDs
+- apiGroups: ["serving.knative.dev"]
+  resources: ["services", "routes", "configurations", "revisions"]
+  verbs: ["create", "update", "get", "list", "delete", "patch", "watch"]
+
+# Networking (required for routes/ingress)
+- apiGroups: ["networking.internal.knative.dev"]
+  resources: ["ingresses"]
+  verbs: ["get", "list", "watch"]
+
+# Autoscaling (optional, for scale-to-zero)
+- apiGroups: ["autoscaling.internal.knative.dev"]
+  resources: ["podautoscalers"]
+  verbs: ["get", "list", "watch"]
+
+# Core Kubernetes resources
+- apiGroups: ["", "apps", "batch"]
+  resources: ["pods", "deployments", "services", "jobs", "horizontalpodautoscalers"]
+  verbs: ["get", "list", "create", "update", "delete"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: team-$NUMBER-access
+  namespace: team-$NUMBER
+subjects:
+- kind: Group
+  name: team-$NUMBER
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: team-member
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: team-$NUMBER-quota
+  namespace: team-$NUMBER
+spec:
+  hard:
+    requests.cpu: "80"
+    requests.memory: 160Gi
+    limits.cpu: "160"
+    limits.memory: 320Gi
+    pods: "100"
+
+---
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: team-$NUMBER-limit-range
+  namespace: team-$NUMBER
+spec:
+  limits:
+  - default:
+      cpu: 1000m
+      memory: 2Gi
+    defaultRequest:
+      cpu: 500m
+      memory: 1Gi
+    max:
+      cpu: 8
+      memory: 16Gi
+    type: Container
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: team-$NUMBER-sa
+  namespace: team-$NUMBER

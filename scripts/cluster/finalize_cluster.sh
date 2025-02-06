@@ -53,3 +53,6 @@ kubectl wait --namespace knative-serving \
   --timeout=300s
 
 kubectl apply -f https://github.com/knative-extensions/net-istio/releases/download/knative-v$KNATIVE_VERSION/net-istio.yaml
+
+kubectl patch cm config-domain -n knative-serving --type merge --patch '{"data":{"192-168-1-240.sslip.io":""}}'
+kubectl patch cm config-domain -n knative-serving --type json --patch '[{"op": "remove", "path": "/data/192.168.1.240.sslip.io"}]'
