@@ -1,0 +1,9 @@
+# templates/mysql/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-config
+  namespace: {{ .Values.namespace }}
+data:
+  init.sql: |
+{{ include "mysql.initScript" . | indent 4 }}

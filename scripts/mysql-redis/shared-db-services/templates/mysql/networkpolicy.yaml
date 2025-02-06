@@ -1,0 +1,18 @@
+# templates/mysql/networkpolicy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-access-policy
+  namespace: {{ .Values.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: mysql
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              access-tier: application
+      ports:
+        - protocol: TCP
+          port: 3306

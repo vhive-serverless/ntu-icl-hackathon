@@ -1,0 +1,6 @@
+# Chart.yaml
+apiVersion: v2
+name: shared-db-services
+description: Shared MySQL and Redis services for multiple teams
+version: 0.1.0
+type: application
