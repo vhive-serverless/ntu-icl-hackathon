@@ -36,4 +36,4 @@ wait
 # finalize master
 
 run_on_node $MASTER_NODE "cd ntu-icl-hackathon && ./scripts/cluster/finalize_cluster.sh"
-run_on_node $MASTER_NODE "cd ntu-icl-hackathon && ./scripts/cluster/deploy_monitoring.sh"
+run_on_node $MASTER_NODE "cd ntu-icl-hackathon && ./scripts/cluster/post_deployment.sh"

@@ -46,6 +46,7 @@ kubectl apply -f https://github.com/knative/serving/releases/download/knative-v$
 kubectl apply -f https://github.com/knative/serving/releases/download/knative-v$KNATIVE_VERSION/serving-core.yaml
 kubectl apply -f https://github.com/knative/serving/releases/download/knative-v$KNATIVE_VERSION/serving-default-domain.yaml
 
+sleep 10
 kubectl wait --namespace knative-serving \
   --for=condition=ready pod \
   --selector=app=controller \
