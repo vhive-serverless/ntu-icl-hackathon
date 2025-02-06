@@ -1,0 +1,15 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: producer
+  namespace: example
+spec:
+  template:
+    spec:
+      containers:
+        - image: nehalem90/ntu-icl-hackathon-producer:latest
+          ports:
+            - containerPort: 50050
+          env:
+            - name: CONSUMER_URL
+              value: http://consumer.example.svc.cluster.local

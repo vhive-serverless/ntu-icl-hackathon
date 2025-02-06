@@ -49,6 +49,6 @@ kubectl apply -f https://github.com/knative/serving/releases/download/knative-v$
 kubectl wait --namespace knative-serving \
   --for=condition=ready pod \
   --selector=app=controller \
-  --timeout=90s
+  --timeout=300s
 
 kubectl apply -f https://github.com/knative-extensions/net-istio/releases/download/knative-v$KNATIVE_VERSION/net-istio.yaml

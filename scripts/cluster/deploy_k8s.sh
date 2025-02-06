@@ -1,15 +1,14 @@
 #!/bin/bash
 
 run_on_node() {
-    ssh $1 $2
+    ssh -oStrictHostKeyChecking=no -p 22 "$1" "$2";
 }
 
 # clone repo and setup node on all nodes
 
 setup_node() {
-    scp -r ../ntu-icl-hackathon $1:~/ntu-icl-hackathon
+    rsync -avzh --progress --stats ../ntu-icl-hackathon $1:~
     # run_on_node $1 "git clone https://github.com/ntu-icl-hackathon/ntu-icl-hackathon.git"
-    run_on_node $1 "cd ntu-icl-hackathon && git checkout dev"
     run_on_node $1 "cd ntu-icl-hackathon && ./scripts/cluster/setup_node.sh"
 }
 
@@ -37,3 +36,4 @@ wait
 # finalize master
 
 run_on_node $MASTER_NODE "cd ntu-icl-hackathon && ./scripts/cluster/finalize_cluster.sh"
+run_on_node $MASTER_NODE "cd ntu-icl-hackathon && ./scripts/cluster/deploy_monitoring.sh"

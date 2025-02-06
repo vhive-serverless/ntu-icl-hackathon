@@ -1,0 +1,12 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: consumer
+  namespace: example
+spec:
+  template:
+    spec:
+      containers:
+        - image: nehalem90/ntu-icl-hackathon-consumer:latest
+          ports:
+            - containerPort: 50051
