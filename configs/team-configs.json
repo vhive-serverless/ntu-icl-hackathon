@@ -1,0 +1,26 @@
+{
+  "team_name": "team1",
+  "mysql": {
+    "storage_size": "8Gi",
+    "root_password": "team1_root_pass",
+    "database": "team1_db",
+    "username": "team1_user",
+    "password": "team1_pass",
+    "resources": {
+      "memory_request": "512Mi",
+      "memory_limit": "1Gi",
+      "cpu_request": "250m",
+      "cpu_limit": "500m"
+    }
+  },
+  "redis": {
+    "storage_size": "8Gi",
+    "password": "team1_redis_pass",
+    "resources": {
+      "memory_request": "256Mi",
+      "memory_limit": "512Mi",
+      "cpu_request": "250m",
+      "cpu_limit": "500m"
+    }
+  }
+}
