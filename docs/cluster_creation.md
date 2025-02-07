@@ -22,4 +22,5 @@ You can check the cluster status from master node with:
 
 ```bash
 kubectl get nodes
+kubectl get pods --all-namespaces
 ```
