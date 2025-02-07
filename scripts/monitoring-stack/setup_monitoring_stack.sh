@@ -39,12 +39,7 @@ echo "Check if stack is up and running"
 sleep 10s
 kubectl get pods -n monitoring
 
-# # echo "Publish grafana on a MetalLB IP"
-# # # User: admin Password: prom-operator
-# # kubectl patch svc monitoring-stack-grafana -n monitoring -p '{"spec": {"type": "LoadBalancer", "loadBalancerIP": "'$GRAFANA_IP'"}}'
+echo "Publish grafana on the node IP"
 
-# tmux new -s prometheusd -d
-# tmux send -t prometheusd "while true; do kubectl port-forward -n monitoring svc/prometheus-operated 9090; done" ENTER
-# #* Set up grafana dash board (id: admin, pwd: prom-operator).
-# tmux new -s grafanad -d
-# tmux send -t grafanad "while true; do kubectl -n monitoring port-forward deployment/prometheus-grafana 3000; done" ENTER
+tmux new -s grafanad -d
+tmux send -t grafanad "while true; do kubectl -n monitoring port-forward deployment/monitoring-stack-grafana 3000; done" ENTER
