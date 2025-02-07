@@ -16,5 +16,5 @@ ssh-keygen -t rsa -b 4096 -f "${KEY_DIR}/${USER1}_key" -N ""
 ssh-keygen -t rsa -b 4096 -f "${KEY_DIR}/${USER2}_key" -N ""
 
 # Set appropriate permissions
-sudo chmod 600 "${KEY_DIR}/${USER1}_key" "${KEY_DIR}/${USER2}_key"
-sudo chmod 644 "${KEY_DIR}/${USER1}_key.pub" "${KEY_DIR}/${USER2}_key.pub"
+chmod 600 "${KEY_DIR}/${USER1}_key" "${KEY_DIR}/${USER2}_key"
+chmod 644 "${KEY_DIR}/${USER1}_key.pub" "${KEY_DIR}/${USER2}_key.pub"

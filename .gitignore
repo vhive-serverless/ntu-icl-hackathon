@@ -1,3 +1,5 @@
 configs/kubeconfig-team*
+configs/kubeconfig-admin
 user_keys/*
 !user_keys/.gitkeep
+admin_keys

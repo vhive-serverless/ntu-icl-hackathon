@@ -43,6 +43,7 @@ for i in $(seq 1 $TEAM_COUNT); do
         # Create SSH directory
         sudo mkdir -p /home/"$USERNAME"/.ssh
         sudo chmod 700 /home/"$USERNAME"/.ssh
+        sudo chown "$USERNAME":"$GROUP_NAME" /home/"$USERNAME"/.ssh
         
         # Generate SSH key pair
         sudo -u "$USERNAME" ssh-keygen -t rsa -b 4096 -f /home/"$USERNAME"/.ssh/id_rsa -N ""
