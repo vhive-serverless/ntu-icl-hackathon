@@ -23,22 +23,156 @@ print_warning() {
     echo -e "${YELLOW}[WARN]${NC} $1"
 }
 
-# Function to get teams from values.yaml
+# Function to show usage information
+show_usage() {
+    echo "Usage: $0 [number_of_teams]"
+    echo "  number_of_teams: Optional. Number of teams to configure (1-5). Default is 2."
+    echo "Example: $0 3"
+}
+
+# Function to generate random password
+generate_password() {
+    # Generate a 16-character random password with letters and numbers
+    LC_ALL=C tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 12
+}
+
+# Function to generate values.yaml content
+generate_values_yaml() {
+    local num_teams=$1
+    local values_file="${CHART_DIR}/values.yaml"
+    
+    # Create base values.yaml content
+    cat > "$values_file" << EOF
+# values.yaml
+namespace: shared-services
+
+# Team configurations - automatically generated
+teams:
+EOF
+
+    # Generate team configurations
+    for ((i=1; i<=num_teams; i++)); do
+        local mysql_pass=$(generate_password)
+        local redis_pass=$(generate_password)
+        
+        cat >> "$values_file" << EOF
+  - name: team${i}
+    mysql:
+      database: team${i}_db
+      username: team${i}_user
+      password: ${mysql_pass}
+    redis:
+      password: ${redis_pass}
+EOF
+    done
+
+    # Add global configurations
+    cat >> "$values_file" << EOF
+
+# Global MySQL configuration
+mysql:
+  rootPassword: $(generate_password)
+  image: mysql:8.0
+  resources:
+    limits:
+      cpu: "4"
+      memory: "8Gi"
+    requests:
+      cpu: "2"
+      memory: "4Gi"
+  storage:
+    size: 100Gi
+  global:
+    maxConnections: 1000
+    maxUserConnections: 50
+    queriesPerHour: 10000
+    updatesPerHour: 5000
+    connectionsPerHour: 1000
+
+# Global Redis configuration
+redis:
+  image: redis:7.0
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+    requests:
+      cpu: "250m"
+      memory: "512Mi"
+  storage:
+    size: 10Gi
+  global:
+    maxMemory: "1gb"
+    maxClients: 1000
+EOF
+
+    print_status "Generated values.yaml with ${num_teams} team(s)"
+    
+    # Create a backup of credentials
+    local creds_file="${SCRIPT_DIR}/credentials-$(date +%Y%m%d-%H%M%S).txt"
+    print_status "Saving credentials to ${creds_file}"
+    
+    echo "Database Credentials (Generated on $(date))" > "$creds_file"
+    echo "==========================================" >> "$creds_file"
+    echo "" >> "$creds_file"
+    echo "MySQL Root Password: $(yq e '.mysql.rootPassword' "$values_file")" >> "$creds_file"
+    echo "" >> "$creds_file"
+    
+    for ((i=1; i<=num_teams; i++)); do
+        echo "Team${i} Credentials:" >> "$creds_file"
+        echo "-------------------" >> "$creds_file"
+        echo "MySQL:" >> "$creds_file"
+        echo "  Database: team${i}_db" >> "$creds_file"
+        echo "  Username: team${i}_user" >> "$creds_file"
+        echo "  Password: $(yq e ".teams[] | select(.name == \"team${i}\") | .mysql.password" "$values_file")" >> "$creds_file"
+        echo "Redis:" >> "$creds_file"
+        echo "  Password: $(yq e ".teams[] | select(.name == \"team${i}\") | .redis.password" "$values_file")" >> "$creds_file"
+        echo "" >> "$creds_file"
+    done
+    
+    chmod 600 "$creds_file"
+}
+
+# Parse command line arguments
+NUM_TEAMS=2  # Default value
+if [ $# -gt 0 ]; then
+    if [[ "$1" =~ ^[1-5]$ ]]; then
+        NUM_TEAMS=$1
+    else
+        print_error "Number of teams must be between 1 and 5"
+        show_usage
+        exit 1
+    fi
+fi
+
+# Generate values.yaml with specified number of teams
+generate_values_yaml $NUM_TEAMS
+
+# Function to get teams (modified to use values.yaml if it exists)
 get_teams() {
     if [ -f "$CHART_DIR/values.yaml" ]; then
         yq e '.teams[].name' "$CHART_DIR/values.yaml"
     else
-        echo "team1 team2"  # Default teams if values.yaml doesn't exist
+        seq -f "team%g" 1 $NUM_TEAMS
     fi
 }
 
-# Check required tools
-for tool in kubectl helm yq; do
-    if ! command -v $tool &> /dev/null; then
-        print_error "$tool is required but not installed. Please install $tool first."
-        exit 1
-    fi
-done
+# Check and install required tools
+if ! [ -x "$(command -v helm)" ]; then
+    echo "Error: helm is not installed."
+    echo "Installing helm..."
+    curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+    sudo apt-get install apt-transport-https --yes
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+    sudo apt-get update --yes
+    sudo apt-get install helm --yes
+fi
+
+if ! command -v yq &> /dev/null; then
+    print_status "Installing yq..."
+    sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+    sudo chmod a+x /usr/local/bin/yq
+fi
 
 # Verify chart directory exists
 if [ ! -d "$CHART_DIR" ]; then
@@ -161,14 +295,6 @@ helm upgrade --install shared-db-services "$CHART_DIR" \
         exit 1
     }
 
-# Get teams from values.yaml and create/label namespaces
-print_status "Setting up team namespaces..."
-for team in $(get_teams); do
-    print_status "Setting up namespace for team: $team"
-    kubectl create namespace "$team" --dry-run=client -o yaml | kubectl apply -f -
-    kubectl label namespace "$team" name="$team" access-tier=application --overwrite
-done
-
 print_status "Verifying deployment status..."
 
 # Check pod status
@@ -182,10 +308,6 @@ kubectl get pvc -n shared-services
 # Check service status
 echo -e "\nServices:"
 kubectl get svc -n shared-services
-
-# Check team namespaces
-echo -e "\nTeam Namespaces:"
-kubectl get namespaces -l access-tier=application
 
 print_status "Deployment process completed!"
 

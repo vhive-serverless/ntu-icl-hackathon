@@ -9,10 +9,6 @@ spec:
     matchLabels:
       app: mysql
   ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              access-tier: application
-      ports:
+    - ports:
         - protocol: TCP
           port: 3306

@@ -53,6 +53,29 @@ spec:
       - name: redis-config
         configMap:
           name: redis-config-{{ .name }}
+      affinity:
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - redis
+                - key: team
+                  operator: In
+                  values:
+                  - {{ .name }}
+              topologyKey: "kubernetes.io/hostname"
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: DoesNotExist
+
 ---
 apiVersion: v1
 kind: Service
@@ -94,11 +117,7 @@ spec:
       app: redis
       team: {{ .name }}
   ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              name: {{ .name }}
-      ports:
+    - ports:
         - protocol: TCP
           port: 6379
 {{- end }}
