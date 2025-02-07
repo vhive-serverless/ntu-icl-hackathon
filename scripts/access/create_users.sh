@@ -1,11 +1,10 @@
 #!/bin/bash
 
 ## README
-# 1. The assumption here is that every team can have access to just one node (if this is not the case, please tell me)
-# 2. This script uses the same password for all users (but since they are part of the same team it should be fine)
-# 3. When you want to run this script for different teams, you should provide a different password!
-# 4. I have included a section at the end of the script on how to use the generated keys
-
+# 1. For each team (1 to 5), this script creates 5 users and places them in the same group (team1, team2, etc.).
+# 2. It uses the same password for all users (It's fine because we are not sahring it with participants).
+# 3. Each team is mapped to its own kubeconfig file in the 'configs' directory (kubeconfig-team1, kubeconfig-team2, etc.).
+# 4. The SSH keys are generated and stored locally in 'user_keys'.
 
 # Check if password argument is provided
 if [ $# -ne 1 ]; then
@@ -15,50 +14,58 @@ fi
 
 PASSWORD=$1
 
-# List of users to be created
-USERS=("user1" "user2" "user3" "user4" "user5")
-
-# Directory to store private keys (optional)
+# Directory to store private keys
 KEY_STORAGE="user_keys"
-mkdir -p $KEY_STORAGE
-chmod 700 $KEY_STORAGE
+mkdir -p "$KEY_STORAGE"
+chmod 700 "$KEY_STORAGE"
 
-for USER in "${USERS[@]}"; do
-    echo "Creating user: $USER"
+TEAM_COUNT=5
+TEAM_USERS=("user1" "user2" "user3" "user4" "user5")
 
-    # Create user without sudo privileges
-    sudo useradd -m -s /bin/bash "$USER"
+# For each team, create a group and five users
+for i in $(seq 1 $TEAM_COUNT); do
+    GROUP_NAME="team${i}"
+    sudo groupadd -f "$GROUP_NAME"
+    
+    for U in "${TEAM_USERS[@]}"; do
+        USERNAME="${GROUP_NAME}-${U}"
 
-    # Set the password (all users will have the same password)
-    echo "$USER:$PASSWORD" | sudo chpasswd
-
-    # Create SSH directory
-    sudo mkdir -p /home/$USER/.ssh
-    sudo chmod 700 /home/$USER/.ssh
-
-    # Generate SSH key pair
-    sudo -u $USER ssh-keygen -t rsa -b 4096 -f /home/$USER/.ssh/id_rsa -N ""
-
-    # Copy the public key to authorized_keys for SSH access
-    sudo cp /home/$USER/.ssh/id_rsa.pub /home/$USER/.ssh/authorized_keys
-    sudo chmod 600 /home/$USER/.ssh/authorized_keys
-    sudo chown -R $USER:$USER /home/$USER/.ssh
-
-    # Store the private key in root directory for later distribution
-    sudo cp /home/$USER/.ssh/id_rsa $KEY_STORAGE/${USER}_id_rsa
-    sudo chmod 600 $KEY_STORAGE/${USER}_id_rsa
-
-    echo "User $USER created and SSH key generated."
-
-    # distribute kubeconfigs
-    # sudo mkdir -p /home/$USER/.kube
-    # sudo cp configs/kubeconfig-$TEAM /home/$USER/.kube/config
-    # sudo chown $USER:$USER /home/$USER/.kube/config
+        echo "Creating user: $USERNAME"
+        
+        # Create user and set group
+        sudo useradd -m -s /bin/bash -g "$GROUP_NAME" "$USERNAME"
+        
+        # Set password for the user
+        echo "$USERNAME:$PASSWORD" | sudo chpasswd
+        
+        # Create SSH directory
+        sudo mkdir -p /home/"$USERNAME"/.ssh
+        sudo chmod 700 /home/"$USERNAME"/.ssh
+        
+        # Generate SSH key pair
+        sudo -u "$USERNAME" ssh-keygen -t rsa -b 4096 -f /home/"$USERNAME"/.ssh/id_rsa -N ""
+        
+        # Copy the public key to authorized_keys
+        sudo cp /home/"$USERNAME"/.ssh/id_rsa.pub /home/"$USERNAME"/.ssh/authorized_keys
+        sudo chmod 600 /home/"$USERNAME"/.ssh/authorized_keys
+        sudo chown -R "$USERNAME":"$GROUP_NAME" /home/"$USERNAME"/.ssh
+        
+        # Store the private key for later distribution
+        sudo cp /home/"$USERNAME"/.ssh/id_rsa "$KEY_STORAGE"/"${USERNAME}_id_rsa"
+        sudo chmod 600 "$KEY_STORAGE"/"${USERNAME}_id_rsa"
+        
+        # Distribute team-specific kubeconfig
+        sudo mkdir -p /home/"$USERNAME"/.kube
+        sudo cp configs/kubeconfig-"$GROUP_NAME" /home/"$USERNAME"/.kube/config
+        sudo chown "$USERNAME":"$GROUP_NAME" /home/"$USERNAME"/.kube/config
+        
+        echo "User $USERNAME created and SSH key generated."
+    done
 done
 
 ##### How to use the generated keys:
 # 1. Copy the private key to your local machine
-# Example for user1: scp user1@<SERVER_IP>:~/user_keys/user1_id_rsa user_keys/user1_id_rsa
-
+# Example for team1-user1: scp team1-user1@<SERVER_IP>:~/user_keys/team1-user1_id_rsa user_keys/team1-user1_id_rsa
+#
 # 2. Use the private key to SSH into the remote server
-# Example for user1: ssh -i user_keys/user1_id_rsa user1@<SERVER_IP>
+# Example for team1-user1: ssh -i user_keys/team1-user1_id_rsa team1-user1@<SERVER_IP>
