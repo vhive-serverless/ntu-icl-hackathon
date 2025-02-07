@@ -3,14 +3,14 @@ namespace: shared-services
 
 # Team configurations - centralized
 teams:
-  - name: team-1
+  - name: team1
     mysql:
       database: team1_db
       username: team1_user
       password: team1_mysql_pass
     redis:
       password: team1_redis_pass
-  - name: team-2
+  - name: team2
     mysql:
       database: team2_db
       username: team2_user

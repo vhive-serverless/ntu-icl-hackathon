@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: team-$NUMBER
+  name: team$NUMBER
   labels:
     purpose: hackathon
 
@@ -10,7 +10,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  namespace: team-$NUMBER
+  namespace: team$NUMBER
   name: team-member
 rules:
 # Knative Serving CRDs
@@ -38,11 +38,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: team-$NUMBER-access
-  namespace: team-$NUMBER
+  name: team$NUMBER-access
+  namespace: team$NUMBER
 subjects:
 - kind: Group
-  name: team-$NUMBER
+  name: team$NUMBER
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
@@ -54,8 +54,8 @@ roleRef:
 apiVersion: v1
 kind: ResourceQuota
 metadata:
-  name: team-$NUMBER-quota
-  namespace: team-$NUMBER
+  name: team$NUMBER-quota
+  namespace: team$NUMBER
 spec:
   hard:
     requests.cpu: "80"
@@ -69,8 +69,8 @@ spec:
 apiVersion: v1
 kind: LimitRange
 metadata:
-  name: team-$NUMBER-limit-range
-  namespace: team-$NUMBER
+  name: team$NUMBER-limit-range
+  namespace: team$NUMBER
 spec:
   limits:
   - default:
@@ -89,5 +89,5 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: team-$NUMBER-sa
-  namespace: team-$NUMBER
+  name: team$NUMBER-sa
+  namespace: team$NUMBER

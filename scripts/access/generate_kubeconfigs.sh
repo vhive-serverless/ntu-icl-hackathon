@@ -13,7 +13,7 @@ CA_CERT=$(cat /etc/kubernetes/pki/ca.crt | base64 -w 0)
 echo '01' | sudo tee /etc/kubernetes/pki/ca.srl
 for i in {1..5}
 do
-  TEAM="team-${i}"
+  TEAM="team${i}"
   openssl req -new -newkey rsa:2048 -nodes -keyout ${TEAM}.key -out ${TEAM}.csr -subj "/CN=${TEAM}/O=${TEAM}"
   sudo openssl x509 -req -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -in ${TEAM}.csr -out ${TEAM}.crt -days 5
   export TEAM=$TEAM
@@ -23,3 +23,7 @@ do
   cat configs/kubeconfig-template | envsubst > configs/kubeconfig-$TEAM
   chmod 600 configs/kubeconfig-$TEAM
 done
+
+# Copy admin kubeconfig to all nodes
+
+sudo cp /etc/kubernetes/admin.conf ./configs/kubeconfig-admin

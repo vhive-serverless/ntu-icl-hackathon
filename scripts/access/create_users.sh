@@ -7,12 +7,12 @@
 # 4. The SSH keys are generated and stored locally in 'user_keys'.
 
 # Check if password argument is provided
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 <password>"
-    exit 1
-fi
+# if [ $# -ne 1 ]; then
+#     echo "Usage: $0 <password>"
+#     exit 1
+# fi
 
-PASSWORD=$1
+# PASSWORD=$1
 
 # Directory to store private keys
 KEY_STORAGE="user_keys"
@@ -28,6 +28,7 @@ for i in $(seq 1 $TEAM_COUNT); do
     sudo groupadd -f "$GROUP_NAME"
     
     for U in "${TEAM_USERS[@]}"; do
+        PASSWORD=`openssl rand -base64 12`
         USERNAME="${GROUP_NAME}-${U}"
 
         echo "Creating user: $USERNAME"
@@ -37,6 +38,7 @@ for i in $(seq 1 $TEAM_COUNT); do
         
         # Set password for the user
         echo "$USERNAME:$PASSWORD" | sudo chpasswd
+        echo "$USERNAME:$PASSWORD" >> $KEY_STORAGE/passwords.txt
         
         # Create SSH directory
         sudo mkdir -p /home/"$USERNAME"/.ssh
