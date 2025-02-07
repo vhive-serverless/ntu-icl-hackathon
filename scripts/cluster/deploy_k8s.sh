@@ -52,3 +52,11 @@ for node in $@; do
     rsync -avzh --progress --stats ./configs/kubeconfig-admin $node:~/configs/
     run_on_node $node "cd ntu-icl-hackathon && ./scripts/access/create_admins.sh"
 done
+
+# deploy mysql and redis
+
+run_on_node $MASTER_NODE "cd ntu-icl-hackathon && ./scripts/mysql-redis/deploy-shared-services.sh"
+
+# deploy monitoring
+
+run_on_node $MASTER_NODE "cd ntu-icl-hackathon && ./scripts/monitoring-stack/setup_monitoring_stack.sh"
