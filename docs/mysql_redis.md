@@ -77,7 +77,6 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: db-test-pod
-  namespace: team1
 spec:
   containers:
   - name: mysql-redis-client
@@ -86,25 +85,25 @@ spec:
 EOF
 
 # Wait for pod to be ready
-kubectl wait --for=condition=ready pod/db-test-pod -n team1
+kubectl wait --for=condition=ready pod/db-test-pod
 ```
 
 2. Install test tools:
 
 ```bash
-kubectl exec -it db-test-pod -n team1 -- bash -c 'apt-get update && apt-get install -y mysql-client redis-tools'
+kubectl exec -it db-test-pod -- bash -c 'apt-get update && apt-get install -y mysql-client redis-tools'
 ```
 
 3. Test MySQL:
 
 ```bash
 # Test connection
-kubectl exec -it db-test-pod -n team1 -- mysql -h mysql.shared-services.svc.cluster.local \
+kubectl exec -it db-test-pod -- mysql -h mysql.shared-services.svc.cluster.local \
   -u team1_user -p'team1_mysql_pass' \
   -e "SHOW DATABASES;"
 
 # Create and query a table
-kubectl exec -it db-test-pod -n team1 -- mysql -h mysql.shared-services.svc.cluster.local \
+kubectl exec -it db-test-pod -- mysql -h mysql.shared-services.svc.cluster.local \
   -u team1_user -p'team1_mysql_pass' team1_db \
   -e "CREATE TABLE test (id INT, name VARCHAR(50));
       INSERT INTO test VALUES (1, 'test1');
@@ -115,12 +114,12 @@ kubectl exec -it db-test-pod -n team1 -- mysql -h mysql.shared-services.svc.clus
 
 ```bash
 # Set and get a key
-kubectl exec -it db-test-pod -n team1 -- redis-cli \
+kubectl exec -it db-test-pod -- redis-cli \
   -h redis-team1.shared-services.svc.cluster.local \
   -a 'team1_redis_pass' \
   SET test_key "Hello from team1"
 
-kubectl exec -it db-test-pod -n team1 -- redis-cli \
+kubectl exec -it db-test-pod -- redis-cli \
   -h redis-team1.shared-services.svc.cluster.local \
   -a 'team1_redis_pass' \
   GET test_key
