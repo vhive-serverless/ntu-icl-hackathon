@@ -32,7 +32,9 @@ for U in "$USER1" "$USER2"; do
     sudo chmod 700 /home/"$U"/.ssh
     sudo chmod 600 /home/"$U"/.ssh/authorized_keys
 
-    # sudo echo "$USER1 ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/99-ntu-cloud
+    # Grant NOPASSWD sudo access for admin users
+    echo "$U ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/"$U"
+    sudo chmod 440 /etc/sudoers.d/"$U"
 
     sudo mkdir -p /home/"$U"/.kube
     sudo cp configs/kubeconfig-admin /home/"$U"/.kube/config
