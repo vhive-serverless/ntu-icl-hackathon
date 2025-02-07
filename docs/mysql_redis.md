@@ -64,14 +64,14 @@ teams:
     mysql:
       database: team1_db
       username: team1_user
-      password: team1_pass
+      password: team1_mysql_pass
     redis:
       password: team1_redis_pass
   - name: team2
     mysql:
       database: team2_db
       username: team2_user
-      password: team2_pass
+      password: team2_mysql_pass
     redis:
       password: team2_redis_pass
   # Add more teams as needed
