@@ -91,12 +91,6 @@ echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.
 sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
 
-# install kn
-
-# KN_VERSION=1.14.0
-
-
-
 # Set node IP for kubelet
 
 ip=$(ip route | awk '/ src / {for(i=1; i<=NF; i++) if ($i == "src") print $(i+1)}' | awk '/^10\..*/ {print; exit}')

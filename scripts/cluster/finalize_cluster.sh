@@ -40,18 +40,18 @@ sudo tar -xzf istio.tar.gz -C /usr/local
 
 # install knative
 
-KNATIVE_VERSION=1.14.0
+KNATIVE_VERSION=1.14.2
 
 kubectl apply -f https://github.com/knative/serving/releases/download/knative-v$KNATIVE_VERSION/serving-crds.yaml
 kubectl apply -f https://github.com/knative/serving/releases/download/knative-v$KNATIVE_VERSION/serving-core.yaml
-kubectl apply -f https://github.com/knative/serving/releases/download/knative-v$KNATIVE_VERSION/serving-default-domain.yaml
 
-sleep 10
+# sleep 10
 kubectl wait --namespace knative-serving \
   --for=condition=ready pod \
   --selector=app=controller \
   --timeout=300s
 
+kubectl apply -f https://github.com/knative/serving/releases/download/knative-v$KNATIVE_VERSION/serving-default-domain.yaml
 kubectl apply -f https://github.com/knative-extensions/net-istio/releases/download/knative-v$KNATIVE_VERSION/net-istio.yaml
 
 kubectl patch cm config-domain -n knative-serving --type merge --patch '{"data":{"192-168-1-240.sslip.io":""}}'
