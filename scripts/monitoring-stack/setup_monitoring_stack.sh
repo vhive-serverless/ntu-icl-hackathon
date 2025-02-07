@@ -1,12 +1,12 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 <GRAFANA_IP>"
-    echo "GRAFANA_IP: The IP address to be used by MetalLB to expose grafana service"
-    exit 1
-fi
+# if [ $# -ne 1 ]; then
+#     echo "Usage: $0 <GRAFANA_IP>"
+#     echo "GRAFANA_IP: The IP address to be used by MetalLB to expose grafana service"
+#     exit 1
+# fi
 
-GRAFANA_IP=$1
+# GRAFANA_IP=$1
 
 if ! [ -x "$(command -v kubectl)" ]; then
     echo "Error: kubectl is not installed."
@@ -39,6 +39,12 @@ echo "Check if stack is up and running"
 sleep 10s
 kubectl get pods -n monitoring
 
-echo "Publish grafana on a MetalLB IP"
-# User: admin Password: prom-operator
-kubectl patch svc monitoring-stack-grafana -n monitoring -p '{"spec": {"type": "LoadBalancer", "loadBalancerIP": "'$GRAFANA_IP'"}}'
+# # echo "Publish grafana on a MetalLB IP"
+# # # User: admin Password: prom-operator
+# # kubectl patch svc monitoring-stack-grafana -n monitoring -p '{"spec": {"type": "LoadBalancer", "loadBalancerIP": "'$GRAFANA_IP'"}}'
+
+# tmux new -s prometheusd -d
+# tmux send -t prometheusd "while true; do kubectl port-forward -n monitoring svc/prometheus-operated 9090; done" ENTER
+# #* Set up grafana dash board (id: admin, pwd: prom-operator).
+# tmux new -s grafanad -d
+# tmux send -t grafanad "while true; do kubectl -n monitoring port-forward deployment/prometheus-grafana 3000; done" ENTER
