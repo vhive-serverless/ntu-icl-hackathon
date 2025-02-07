@@ -44,13 +44,13 @@ run_on_node $MASTER_NODE "cd ntu-icl-hackathon && ./scripts/access/generate_kube
 rsync -avzh --progress --stats $MASTER_NODE:~/ntu-icl-hackathon/configs/kubeconfig-* ./configs/
 
 # users are only on node-001
-rsync -avzh --progress --stats ./configs/kubeconfig-team* $1:~/configs/
+rsync -avzh --progress --stats ./configs/kubeconfig-* $1:~/ntu-icl-hackathon/configs/
 run_on_node $1 "cd ntu-icl-hackathon && ./scripts/access/create_users.sh"
-rsync -avzh --progress --stats $1:~/ntu-icl-hackathon/key_storage/ ./
+rsync -avzh --progress --stats $1:~/ntu-icl-hackathon/user_keys/ ./user_keys/
 
 # admins are on all nodes
 for node in $@; do
-    rsync -avzh --progress --stats ./configs/kubeconfig-admin $node:~/configs/
+    rsync -avzh --progress --stats ./configs/kubeconfig-admin $node:~/ntu-icl-hackathon/configs/
     run_on_node $node "cd ntu-icl-hackathon && ./scripts/access/create_admins.sh"
 done
 

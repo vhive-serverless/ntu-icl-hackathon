@@ -55,6 +55,8 @@ for i in $(seq 1 $TEAM_COUNT); do
         # Store the private key for later distribution
         sudo cp /home/"$USERNAME"/.ssh/id_rsa "$KEY_STORAGE"/"${USERNAME}_id_rsa"
         sudo chmod 600 "$KEY_STORAGE"/"${USERNAME}_id_rsa"
+        sudo cp /home/"$USERNAME"/.ssh/id_rsa.pub "$KEY_STORAGE"/"${USERNAME}_id_rsa.pub"
+        sudo chmod 600 "$KEY_STORAGE"/"${USERNAME}_id_rsa.pub"
         
         # Distribute team-specific kubeconfig
         sudo mkdir -p /home/"$USERNAME"/.kube
