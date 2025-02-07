@@ -50,14 +50,14 @@ for i in $(seq 1 $TEAM_COUNT); do
         
         # Copy the public key to authorized_keys
         sudo cp /home/"$USERNAME"/.ssh/id_rsa.pub /home/"$USERNAME"/.ssh/authorized_keys
-        sudo chmod 600 /home/"$USERNAME"/.ssh/authorized_keys
+        sudo chmod 644 /home/"$USERNAME"/.ssh/authorized_keys
         sudo chown -R "$USERNAME":"$GROUP_NAME" /home/"$USERNAME"/.ssh
         
         # Store the private key for later distribution
         sudo cp /home/"$USERNAME"/.ssh/id_rsa "$KEY_STORAGE"/"${USERNAME}_id_rsa"
         sudo chmod 600 "$KEY_STORAGE"/"${USERNAME}_id_rsa"
         sudo cp /home/"$USERNAME"/.ssh/id_rsa.pub "$KEY_STORAGE"/"${USERNAME}_id_rsa.pub"
-        sudo chmod 600 "$KEY_STORAGE"/"${USERNAME}_id_rsa.pub"
+        sudo chmod 644 "$KEY_STORAGE"/"${USERNAME}_id_rsa.pub"
         
         # Distribute team-specific kubeconfig
         sudo mkdir -p /home/"$USERNAME"/.kube

@@ -30,7 +30,7 @@ rules:
 
 # Core Kubernetes resources
 - apiGroups: ["", "apps", "batch"]
-  resources: ["pods", "deployments", "services", "jobs", "horizontalpodautoscalers"]
+  resources: ["pods", "deployments", "services", "jobs", "horizontalpodautoscalers", "pods/exec", "configmaps"]
   verbs: ["get", "list", "create", "update", "delete"]
 
 ---
