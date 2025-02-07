@@ -37,3 +37,18 @@ wait
 
 run_on_node $MASTER_NODE "cd ntu-icl-hackathon && ./scripts/cluster/finalize_cluster.sh"
 run_on_node $MASTER_NODE "cd ntu-icl-hackathon && ./scripts/cluster/post_deployment.sh"
+
+# access management
+
+run_on_node $MASTER_NODE "cd ntu-icl-hackathon && ./scripts/cluster/generate_accesses.sh"
+rsync -avzh --progress --stats $MASTER_NODE:~/ntu-icl-hackathon/configs/kubeconfig-* ./configs/
+
+# users are only on node-001
+rsync -avzh --progress --stats ./configs/kubeconfig-team-* $1:~/configs/
+run_on_node $1 "cd ntu-icl-hackathon && ./scripts/access/create_users.sh"
+
+# admins are on all nodes
+for node in $@; do
+    rsync -avzh --progress --stats ./configs/kubeconfig-admin $node:~/configs/
+    run_on_node $node "cd ntu-icl-hackathon && ./scripts/access/create_admins.sh"
+done

@@ -2,7 +2,7 @@
 
 # create team namespaces, roles, rolebindings, and quotas
 
-for i in {1..1}
+for i in {1..5}
 do
   cat configs/access-template.yaml | NUMBER=$i envsubst | kubectl apply -f -
 done
@@ -11,7 +11,7 @@ done
 
 CA_CERT=$(cat /etc/kubernetes/pki/ca.crt | base64 -w 0)
 echo '01' | sudo tee /etc/kubernetes/pki/ca.srl
-for i in {1..1}
+for i in {1..5}
 do
   TEAM="team-${i}"
   openssl req -new -newkey rsa:2048 -nodes -keyout ${TEAM}.key -out ${TEAM}.csr -subj "/CN=${TEAM}/O=${TEAM}"
@@ -22,10 +22,4 @@ do
   export CA_CERT=$CA_CERT
   cat configs/kubeconfig-template | envsubst > configs/kubeconfig-$TEAM
   chmod 600 configs/kubeconfig-$TEAM
-  for j in {1..1}
-  do
-    sudo mkdir -p /home/team${i}user${j}/.kube
-    sudo cp configs/kubeconfig-$TEAM /home/team${i}user${j}/.kube/config
-    sudo chown team${i}user${j}:team-${i} /home/team${i}user${j}/.kube/config
-  done
 done

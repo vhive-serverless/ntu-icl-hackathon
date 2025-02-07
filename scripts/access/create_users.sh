@@ -49,6 +49,11 @@ for USER in "${USERS[@]}"; do
     sudo chmod 600 $KEY_STORAGE/${USER}_id_rsa
 
     echo "User $USER created and SSH key generated."
+
+    # distribute kubeconfigs
+    # sudo mkdir -p /home/$USER/.kube
+    # sudo cp configs/kubeconfig-$TEAM /home/$USER/.kube/config
+    # sudo chown $USER:$USER /home/$USER/.kube/config
 done
 
 ##### How to use the generated keys:
