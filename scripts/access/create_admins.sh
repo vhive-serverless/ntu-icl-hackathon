@@ -52,18 +52,18 @@ for NAME in "${NODE_NAMES[@]}"; do
 done
 
 # Add admin accounts to sudoers (restricted)
-echo "$USER1 ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/99-ntu-cloud
-echo "$USER2 ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/99-ntu-cloud
-chmod 440 /etc/sudoers.d/99-ntu-cloud
+sudo echo "$USER1 ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/99-ntu-cloud
+sudo echo "$USER2 ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/99-ntu-cloud
+sudo chmod 440 /etc/sudoers.d/99-ntu-cloud
 
 # Copy kubeconfig to the new admin accounts and existing users
 for U in "$USER1" "$USER2" "lkondras" "nehalem" "JunkeMao" "yulin001"; do
-  mkdir -p /home/"$U"/.kube
-  cp configs/kubeconfig-admin /home/"$U"/.kube/config
-  chown -R "$U":"$U" /home/"$U"/.kube
-  chmod 700 /home/"$U"/.kube
-  chmod 600 /home/"$U"/.kube/config
+  sudo mkdir -p /home/"$U"/.kube
+  sudo cp configs/kubeconfig-admin /home/"$U"/.kube/config
+  sudo chown -R "$U":"$U" /home/"$U"/.kube
+  sudo chmod 700 /home/"$U"/.kube
+  sudo chmod 600 /home/"$U"/.kube/config
 done
 
 # Reduce access rights of all admin accounts' home directories
-chmod 750 /home/"$USER1" /home/"$USER2"
+sudo chmod 750 /home/"$USER1" /home/"$USER2"

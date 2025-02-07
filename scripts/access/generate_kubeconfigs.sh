@@ -27,3 +27,4 @@ done
 # Copy admin kubeconfig to all nodes
 
 sudo cp /etc/kubernetes/admin.conf ./configs/kubeconfig-admin
+sudo chown $USER:$(id -gn $USER) ./configs/kubeconfig-admin
