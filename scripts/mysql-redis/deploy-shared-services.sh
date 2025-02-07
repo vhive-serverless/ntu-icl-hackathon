@@ -4,6 +4,8 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CHART_DIR="${SCRIPT_DIR}/shared-db-services"
 
+NUM_TEAMS=5  # Default value
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -29,6 +31,23 @@ show_usage() {
     echo "  number_of_teams: Optional. Number of teams to configure (1-5). Default is 2."
     echo "Example: $0 3"
 }
+
+# Check and install required tools
+if ! [ -x "$(command -v helm)" ]; then
+    echo "Error: helm is not installed."
+    echo "Installing helm..."
+    curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+    sudo apt-get install apt-transport-https --yes
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+    sudo apt-get update --yes
+    sudo apt-get install helm --yes
+fi
+
+if ! command -v yq &> /dev/null; then
+    print_status "Installing yq..."
+    sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+    sudo chmod a+x /usr/local/bin/yq
+fi
 
 # Function to generate random password
 generate_password() {
@@ -134,7 +153,6 @@ EOF
 }
 
 # Parse command line arguments
-NUM_TEAMS=2  # Default value
 if [ $# -gt 0 ]; then
     if [[ "$1" =~ ^[1-5]$ ]]; then
         NUM_TEAMS=$1
@@ -156,23 +174,6 @@ get_teams() {
         seq -f "team%g" 1 $NUM_TEAMS
     fi
 }
-
-# Check and install required tools
-if ! [ -x "$(command -v helm)" ]; then
-    echo "Error: helm is not installed."
-    echo "Installing helm..."
-    curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-    sudo apt-get install apt-transport-https --yes
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-    sudo apt-get update --yes
-    sudo apt-get install helm --yes
-fi
-
-if ! command -v yq &> /dev/null; then
-    print_status "Installing yq..."
-    sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-    sudo chmod a+x /usr/local/bin/yq
-fi
 
 # Verify chart directory exists
 if [ ! -d "$CHART_DIR" ]; then
