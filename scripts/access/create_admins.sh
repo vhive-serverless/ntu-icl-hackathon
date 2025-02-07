@@ -7,12 +7,12 @@
 
 # Check if at least one IP is provided
 if [ $# -eq 0 ]; then
-    echo "Usage: $0 node_ip [node_ip ...]"
+    echo "Usage: $0 node_name [node_name ...]"
     exit 1
 fi
 
-# Store IPs in an array
-NODE_IPS=("$@")
+# Store names in an array
+NODE_NAMES=("$@")
 
 # Create ntu-cloud group if it doesn't exist
 groupadd -f ntu-cloud
@@ -41,10 +41,13 @@ for U in "$USER1" "$USER2"; do
 done
 
 # Copy public keys to all nodes
-for IP in "${NODE_IPS[@]}"; do
+for NAME in "${NODE_NAMES[@]}"; do
     for U in "$USER1" "$USER2"; do
-        # Copy public key to remote nodes
-        ssh-copy-id -i "/home/$U/.ssh/id_ed25519.pub" "$U@$IP"
+        # Create user and add to ntu-cloud group on remote node
+        ssh "$NAME" "groupadd -f ntu-cloud && useradd -m -s /bin/bash -g ntu-cloud $U"
+        # Copy public key to remote node
+        ssh "$NAME" "mkdir -p /home/$U/.ssh"
+        scp /home/"$U"/.ssh/id_ed25519.pub "$NAME":/home/"$U"/.ssh/authorized_keys
     done
 done
 
