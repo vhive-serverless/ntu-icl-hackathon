@@ -22,7 +22,7 @@ kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v$METALLB_VER
 kubectl wait --namespace metallb-system \
   --for=condition=ready pod \
   --selector=app=metallb \
-  --timeout=90s
+  --timeout=300s
 
 kubectl apply -f configs/metallb-pool.yaml
 
