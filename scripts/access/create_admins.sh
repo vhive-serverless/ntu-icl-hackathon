@@ -47,9 +47,10 @@ done
 # sudo chmod 440 /etc/sudoers.d/99-ntu-cloud
 
 # Copy kubeconfig to the new admin accounts and existing users
-for U in "lkondras" "nehalem" "JunkeMao" "yulin001"; do
+for U in "lkondras" "nehalem" "Junkemao" "yulin001"; do
     sudo mkdir -p /users/"$U"/.kube
     sudo cp configs/kubeconfig-admin /users/"$U"/.kube/config
+    sudo chown -R "$U":ntu-cloud /users/"$U"/.kube
     sudo chmod 700 /users/"$U"/.kube
     sudo chmod 600 /users/"$U"/.kube/config
     sudo chmod 750 /users/"$U"

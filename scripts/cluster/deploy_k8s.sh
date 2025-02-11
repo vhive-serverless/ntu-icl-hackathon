@@ -50,11 +50,15 @@ rsync -avzh --progress --stats $1:~/ntu-icl-hackathon/user_keys/ ./user_keys/
 
 # admins are on all nodes
 ./scripts/access/create_admins_key.sh
-for node in $@; do
+for node in $MASTER_NODE $@; do
     rsync -avzh --progress --stats ./configs/kubeconfig-admin $node:~/ntu-icl-hackathon/configs/
     rsync -avzh --progress --stats ./admin_keys/ $node:~/ntu-icl-hackathon/admin_keys/
     run_on_node $node "cd ntu-icl-hackathon && ./scripts/access/create_admins.sh"
 done
+
+# taint frontend node
+
+run_on_node $1 "kubectl taint nodes \$(hostname) role=frontend:NoSchedule"
 
 # deploy mysql and redis
 
