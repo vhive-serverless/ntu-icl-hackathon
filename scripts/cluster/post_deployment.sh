@@ -5,3 +5,4 @@
 # newgrp docker
 
 curl -sS https://webinstall.dev/k9s | bash
+sudo mv .local/bin/k9s /usr/bin/
